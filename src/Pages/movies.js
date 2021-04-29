@@ -1,4 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import SearchIcon from "@material-ui/icons/Search";
+
 import { withStyles, makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -77,12 +80,21 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 export default function CustomizedTables() {
   const classes = useStyles();
   const [state, setState] = useState([]);
+  const [search, setSearch] = useState("");
+  const [searching, setSearching] = useState(false);
   const [rank, setRank] = React.useState("");
   const [data, setData] = useState([]);
   const [dataa, setDataa] = useState([]);
   const [comment, setComment] = useState("");
   const [finalData, setfinalData] = useState();
   const [open, setOpen] = React.useState(false);
+  const [searchResults, setSearchResults]  = React.useState({
+    id: null,
+    name: null,
+    comments: [],
+    year: null,
+    description: null,
+  });
   const [popup, setPopUp] = React.useState({
     id: null,
     name: null,
@@ -96,6 +108,8 @@ export default function CustomizedTables() {
   }, []);
 
   const rows = data;
+  const searchmovie = searchResults;
+  console.log(searchmovie)
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -115,13 +129,28 @@ export default function CustomizedTables() {
       description: details.description,
     });
   };
+  const handleSearchView = async (details) => {
+    setOpen(true);
+    setPopUp({
+      id: details.id,
+      name: details.name,
+      comments: details.comments,
+      year: details.year,
+      description: details.description,
+    });
+  };
   let getcomments = [...data];
   const element = data.findIndex((element) => {
     return element.id == popup.id;
   });
   let getcomment = getcomments[element];
-
-  console.log("element", getcomment);
+  const handleSearch = async (evt) => {
+    evt.preventDefault();
+    setSearching(true)
+    const result = data.filter((word) => word.name.includes(search));
+    setSearchResults(result)
+    console.log('search',result)
+  };
   // const handleChange = async () => {
   //   const hi = data.find((x) => x.id === element);
   //   const no = hi.comments.concat({
@@ -131,18 +160,18 @@ export default function CustomizedTables() {
   //   });
   //   data[element].comments = no;
   //   console.log("hi", data);
-    // let getcomments = [...data];
-    // const element = data.findIndex((element) => {
-    //   return element.id == popup.id;
-    // });
-    // let getcomment = getcomments[element];
-    // // getcomment.concat({user4: comment, rank: rank })
-    // // getcomment.comments.push({ user4: comment, rank: rank });
-    // console.log("element", getcomment);
-    // // let ei = setData({...getcomments,getcomments[element].comments.concat({ user4: comment, rank: rank })});
-    // // let yesu = getcomment.concat(getcomments);
-    // await setDataa('yes');
-    //     console.log('getcomment',state);
+  // let getcomments = [...data];
+  // const element = data.findIndex((element) => {
+  //   return element.id == popup.id;
+  // });
+  // let getcomment = getcomments[element];
+  // // getcomment.concat({user4: comment, rank: rank })
+  // // getcomment.comments.push({ user4: comment, rank: rank });
+  // console.log("element", getcomment);
+  // // let ei = setData({...getcomments,getcomments[element].comments.concat({ user4: comment, rank: rank })});
+  // // let yesu = getcomment.concat(getcomments);
+  // await setDataa('yes');
+  //     console.log('getcomment',state);
   // };
 
   const handleSubmit = async (evt) => {
@@ -155,19 +184,69 @@ export default function CustomizedTables() {
       rank: rank,
     });
     data[element].comments = no;
-setPopUp(data[element])
+    setPopUp(data[element]);
     await axios
       .post("http://localhost:3000/movie/add-comment", { list: data })
       .then(function (response) {
         console.log(response);
       });
-      
   };
 
   return (
     <>
       <Appbar />
-      <TableContainer component={Paper}>
+      <form onSubmit={handleSearch}>
+        <TextField
+        className={classes.margin}
+        id="input-with-icon-textfield"
+        // label="TextField"
+        name="search"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        }}
+      />
+      </form>
+      
+      {searching ? <TableContainer component={Paper}>
+        <Table className={classes.table} aria-label="customized table">
+          <TableHead>
+            <TableRow>
+              <StyledTableCell>Movie</StyledTableCell>
+              <StyledTableCell align="right">Description</StyledTableCell>
+              <StyledTableCell align="right">Year</StyledTableCell>
+              <StyledTableCell align="right">Director</StyledTableCell>
+              <StyledTableCell align="right">Action</StyledTableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+              <StyledTableRow key={searchmovie.name}>
+                <StyledTableCell component="th" scope="row">
+                  {searchmovie[0].name}
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  {searchmovie[0].description}
+                </StyledTableCell>
+                <StyledTableCell align="right">{searchmovie[0].year}</StyledTableCell>
+                <StyledTableCell align="right">{searchmovie[0].director}</StyledTableCell>
+                <StyledTableCell align="right">
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => handleView(searchmovie)}
+                  >
+                    Rank/Comment
+                  </Button>
+                </StyledTableCell>
+              </StyledTableRow>
+          </TableBody>
+        </Table>
+      </TableContainer> : <TableContainer component={Paper}>
         <Table className={classes.table} aria-label="customized table">
           <TableHead>
             <TableRow>
@@ -202,7 +281,7 @@ setPopUp(data[element])
             ))}
           </TableBody>
         </Table>
-      </TableContainer>
+      </TableContainer> }
       <Dialog
         fullScreen
         open={open}

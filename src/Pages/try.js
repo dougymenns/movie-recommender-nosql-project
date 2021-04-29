@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { withStyles, makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -31,8 +31,6 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
-import Appbar from "./appbar";
-
 const StyledTableCell = withStyles((theme) => ({
   head: {
     backgroundColor: theme.palette.common.black,
@@ -76,12 +74,10 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 export default function CustomizedTables() {
   const classes = useStyles();
-  const [state, setState] = useState([]);
-  const [rank, setRank] = React.useState("");
+  const [rank, setRank] = React.useState('');
   const [data, setData] = useState([]);
-  const [dataa, setDataa] = useState([]);
-  const [comment, setComment] = useState("");
-  const [finalData, setfinalData] = useState();
+  const [comment, setComment] = useState('');
+  const [finalData, setfinalData] = useState([]);
   const [open, setOpen] = React.useState(false);
   const [popup, setPopUp] = React.useState({
     id: null,
@@ -90,17 +86,36 @@ export default function CustomizedTables() {
     year: null,
     description: null,
   });
+
   useEffect(async () => {
     const result = await axios("http://localhost:3000/movies");
+
     setData(result.data.res);
   }, []);
 
   const rows = data;
+  const handleChange = (event) => {
+    setComment(event.target.value);
+    console.log(comment)
+  };
+  
+  const handleSubmit = async (evt) => {
+      evt.preventDefault();
+    // setfinalData([
+    //   ...getcomments,
+    //   getcomments[element].comments.push({ user: comment, rank: rank }),
+    // ]);
+    axios
+      .post("http://localhost:3000/movie/add-comment", { list: finalData })
+      .then(function (response) {
+        console.log(response);
+      });
+    console.log("fin", finalData);
+  };
   const handleClickOpen = () => {
     setOpen(true);
   };
-  //   const element = data.findIndex(element =>{ return (element.id == 1)})
-  //   let final  = [...data]
+
   const handleClose = () => {
     setOpen(false);
   };
@@ -114,59 +129,14 @@ export default function CustomizedTables() {
       year: details.year,
       description: details.description,
     });
+    let getcomments = [...data];
+    const element = getcomments.findIndex((elemento) => elemento.id === popup.id);
+        console.log(getcomments.findIndex((elemento) => elemento.id === popup.id));
   };
-  let getcomments = [...data];
-  const element = data.findIndex((element) => {
-    return element.id == popup.id;
-  });
-  let getcomment = getcomments[element];
-
-  console.log("element", getcomment);
-  // const handleChange = async () => {
-  //   const hi = data.find((x) => x.id === element);
-  //   const no = hi.comments.concat({
-  //     user: localStorage.getItem("Username"),
-  //     comment: comment,
-  //     rank: rank,
-  //   });
-  //   data[element].comments = no;
-  //   console.log("hi", data);
-    // let getcomments = [...data];
-    // const element = data.findIndex((element) => {
-    //   return element.id == popup.id;
-    // });
-    // let getcomment = getcomments[element];
-    // // getcomment.concat({user4: comment, rank: rank })
-    // // getcomment.comments.push({ user4: comment, rank: rank });
-    // console.log("element", getcomment);
-    // // let ei = setData({...getcomments,getcomments[element].comments.concat({ user4: comment, rank: rank })});
-    // // let yesu = getcomment.concat(getcomments);
-    // await setDataa('yes');
-    //     console.log('getcomment',state);
-  // };
-
-  const handleSubmit = async (evt) => {
-    // handleChange();
-    evt.preventDefault();
-    const hi = data.find((x) => x.id === element);
-    const no = hi.comments.concat({
-      user: localStorage.getItem("Username"),
-      comment: comment,
-      rank: rank,
-    });
-    data[element].comments = no;
-setPopUp(data[element])
-    await axios
-      .post("http://localhost:3000/movie/add-comment", { list: data })
-      .then(function (response) {
-        console.log(response);
-      });
-      
-  };
+  console.log(popup.id)
 
   return (
     <>
-      <Appbar />
       <TableContainer component={Paper}>
         <Table className={classes.table} aria-label="customized table">
           <TableHead>
@@ -283,7 +253,7 @@ setPopUp(data[element])
                       variant="filled"
                       name="comment"
                       value={comment}
-                      onChange={(e) => setComment(e.target.value)}
+                      onChange={handleChange}
                     />
                   </Grid>
                   <Grid item xs={6} sm={4}>
@@ -298,11 +268,9 @@ setPopUp(data[element])
                         labelId="demo-simple-select-outlined-label"
                         id="demo-simple-select-outlined"
                         value={rank}
-                        name="rank"
-                        onChange={(e) => {
-                          setRank(e.target.value);
-                        }}
+                        onChange={handleChange}
                         label="Rank"
+                        name="rank"
                       >
                         <MenuItem value="">
                           <em>None</em>
@@ -318,7 +286,7 @@ setPopUp(data[element])
                   <Grid item xs={6} sm={3}>
                     <Button
                       variant="contained"
-                      onClick={(e) => handleSubmit(e)}
+                      onClick={handleSubmit}
                       fullWidth="true"
                     >
                       Submit

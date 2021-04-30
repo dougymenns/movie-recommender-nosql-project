@@ -101,13 +101,18 @@ export default function CustomizedTables() {
     comments: [],
     year: null,
     description: null,
+    rank: null
   });
   useEffect(async () => {
     const result = await axios("http://localhost:3000/movies");
     setData(result.data.res);
   }, []);
-
+// console.log(data.map((dd)=>{return dd.comments}))
   const rows = data;
+  const getrank = data.map((row)=>{return row.comments})
+  const popsize = popup.comments.length
+  console.log(popsize)
+
   const searchmovie = searchResults;
   console.log(searchmovie)
   const handleClickOpen = () => {
@@ -175,13 +180,17 @@ export default function CustomizedTables() {
   // };
 
   const handleSubmit = async (evt) => {
+   
     // handleChange();
     evt.preventDefault();
     const hi = data.find((x) => x.id === element);
+    const score = rank + hi.rank;
+     hi["rank"] = score
+    console.log(hi)
     const no = hi.comments.concat({
       user: localStorage.getItem("Username"),
       comment: comment,
-      rank: rank,
+      rank: rank/(popsize),
     });
     data[element].comments = no;
     setPopUp(data[element]);
@@ -253,7 +262,7 @@ export default function CustomizedTables() {
               <StyledTableCell>Movie</StyledTableCell>
               <StyledTableCell align="right">Description</StyledTableCell>
               <StyledTableCell align="right">Year</StyledTableCell>
-              <StyledTableCell align="right">Director</StyledTableCell>
+              <StyledTableCell align="right">Rank</StyledTableCell>
               <StyledTableCell align="right">Action</StyledTableCell>
             </TableRow>
           </TableHead>
@@ -267,7 +276,7 @@ export default function CustomizedTables() {
                   {row.description}
                 </StyledTableCell>
                 <StyledTableCell align="right">{row.year}</StyledTableCell>
-                <StyledTableCell align="right">{row.director}</StyledTableCell>
+                <StyledTableCell align="right">{row.rank}</StyledTableCell>
                 <StyledTableCell align="right">
                   <Button
                     variant="outlined"
@@ -346,8 +355,8 @@ export default function CustomizedTables() {
                     <>
                       <ListItem button>
                         <ListItemText
-                          primary={details.user}
-                          secondary={details.comment}
+                          secondary={<div>{details.user} <p style={{color:"blue"}}>rank: {details.rank}</p></div>}
+                          primary={details.comment} 
                         />
                       </ListItem>
                       <Divider />

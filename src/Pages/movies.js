@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import SearchIcon from "@material-ui/icons/Search";
-
+import MaterialTable from "material-table"
 import { withStyles, makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -255,42 +255,28 @@ export default function CustomizedTables() {
               </StyledTableRow>
           </TableBody>
         </Table>
-      </TableContainer> : <TableContainer component={Paper}>
-        <Table className={classes.table} aria-label="customized table">
-          <TableHead>
-            <TableRow>
-              <StyledTableCell>Movie</StyledTableCell>
-              <StyledTableCell align="right">Description</StyledTableCell>
-              <StyledTableCell align="right">Year</StyledTableCell>
-              <StyledTableCell align="right">Rank</StyledTableCell>
-              <StyledTableCell align="right">Action</StyledTableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map((row) => (
-              <StyledTableRow key={row.name}>
-                <StyledTableCell component="th" scope="row">
-                  {row.name}
-                </StyledTableCell>
-                <StyledTableCell align="right">
-                  {row.description}
-                </StyledTableCell>
-                <StyledTableCell align="right">{row.year}</StyledTableCell>
-                <StyledTableCell align="right">{row.rank}</StyledTableCell>
-                <StyledTableCell align="right">
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    onClick={() => handleView(row)}
-                  >
-                    Rank/Comment
-                  </Button>
-                </StyledTableCell>
-              </StyledTableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer> }
+      </TableContainer> : <><MaterialTable
+      title="Simple Action Preview"
+      columns={[
+        { title: 'Name', field: 'name' },
+        { title: 'Description', field: 'description' },
+        { title: 'Year', field: 'year', type: 'numeric' },
+        {
+          title: 'Rank',
+          field: 'rank',
+        },
+      ]}
+      data={data}        
+      actions={[
+        {
+          icon: 'save',
+          tooltip: 'Save User',
+          onClick: (event, rowData) => handleView(rowData)
+        }
+      ]}
+    /></>
+      
+      }
       <Dialog
         fullScreen
         open={open}

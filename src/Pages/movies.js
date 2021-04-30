@@ -269,7 +269,7 @@ export default function CustomizedTables() {
       data={data}        
       actions={[
         {
-          icon: 'save',
+          icon: 'visibility',
           tooltip: 'Save User',
           onClick: (event, rowData) => handleView(rowData)
         }
